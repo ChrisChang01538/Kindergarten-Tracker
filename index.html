@@ -515,46 +515,56 @@ async function syncData(silent=false) {
 function hvs(a,b,c,d){const R=6371,dl=(c-a)*Math.PI/180,do_=(d-b)*Math.PI/180,e=Math.sin(dl/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(do_/2)**2;return R*2*Math.atan2(Math.sqrt(e),Math.sqrt(1-e));}
 function calcDistStraight(k){if(k.lat&&k.lng){k.dist_san=hvs(BASES.産基會.lat,BASES.産基會.lng,k.lat,k.lng);k.dist_he=hvs(BASES.河堤.lat,BASES.河堤.lng,k.lat,k.lng);}}
 
-// Distance Matrix API - bicycling mode, batched
-async function fetchBicyclingDists() {
-  // Check if all KG already have bike distances cached
-  const needUpdate = KG.filter(k => k.lat && k.lng && k.dist_san_bike == null);
-  if (!needUpdate.length) return;
+// Distance Matrix using Google Maps JS DistanceMatrixService (browser-safe, no CORS)
+function fetchBicyclingDists() {
+  return new Promise(resolve => {
+    const needUpdate = KG.filter(k => k.lat && k.lng && k.dist_san_bike == null);
+    if (!needUpdate.length) { resolve(); return; }
 
-  const origins = [
-    `${BASES.産基會.lat},${BASES.産基會.lng}`,
-    `${BASES.河堤.lat},${BASES.河堤.lng}`
-  ].join('|').replace(/産基会/g,'産基會');
+    const service = new google.maps.DistanceMatrixService();
+    const origins = [
+      new google.maps.LatLng(BASES.産基會.lat, BASES.産基會.lng),
+      new google.maps.LatLng(BASES.河堤.lat,   BASES.河堤.lng)
+    ];
+    const destinations = needUpdate.map(k => new google.maps.LatLng(k.lat, k.lng));
 
-  // Process in batches of 10 (API limit 25 destinations per request)
-  const BATCH = 10;
-  for (let i = 0; i < needUpdate.length; i += BATCH) {
-    const batch = needUpdate.slice(i, i + BATCH);
-    const dests = batch.map(k => `${k.lat},${k.lng}`).join('|');
-    const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(
-      `${BASES.産基會.lat},${BASES.産基會.lng}|${BASES.河堤.lat},${BASES.河堤.lng}`
-    )}&destinations=${encodeURIComponent(dests)}&mode=bicycling&language=zh-TW&key=${MAPS_KEY}`;
+    const BATCH = 25;
+    let done = 0;
+    const totalBatches = Math.ceil(destinations.length / BATCH);
 
-    try {
-      const data = await (await fetch(url)).json();
-      if (data.status === 'OK') {
-        batch.forEach((k, j) => {
-          const sanEl = data.rows[0]?.elements[j];
-          const heEl  = data.rows[1]?.elements[j];
-          if (sanEl?.status === 'OK') k.dist_san_bike = sanEl.distance.value / 1000;
-          if (heEl?.status  === 'OK') k.dist_he_bike  = heEl.distance.value  / 1000;
-          // Fallback to straight-line if API fails for this element
+    for (let i = 0; i < destinations.length; i += BATCH) {
+      const batchDests = destinations.slice(i, i + BATCH);
+      const batchKG    = needUpdate.slice(i, i + BATCH);
+
+      service.getDistanceMatrix({
+        origins,
+        destinations: batchDests,
+        travelMode: google.maps.TravelMode.BICYCLING,
+        unitSystem: google.maps.UnitSystem.METRIC,
+      }, (resp, status) => {
+        if (status === 'OK') {
+          batchKG.forEach((k, j) => {
+            const sanEl = resp.rows[0]?.elements[j];
+            const heEl  = resp.rows[1]?.elements[j];
+            if (sanEl?.status === 'OK') k.dist_san_bike = sanEl.distance.value / 1000;
+            if (heEl?.status  === 'OK') k.dist_he_bike  = heEl.distance.value  / 1000;
+          });
+        }
+        // Fallback to straight-line for any that failed
+        batchKG.forEach(k => {
           if (k.dist_san_bike == null) k.dist_san_bike = k.dist_san;
           if (k.dist_he_bike  == null) k.dist_he_bike  = k.dist_he;
         });
-      }
-    } catch(e) {
-      console.warn('Distance Matrix error:', e);
-      // Fallback to straight-line
-      batch.forEach(k => { k.dist_san_bike = k.dist_san; k.dist_he_bike = k.dist_he; });
+        done++;
+        if (done >= totalBatches) {
+          localStorage.setItem('kg_data', JSON.stringify(KG));
+          renderCards();
+          if (mapInit) refreshMapMarkers();
+          resolve();
+        }
+      });
     }
-  }
-  localStorage.setItem('kg_data', JSON.stringify(KG));
+  });
 }
 
 async function geocodeOne(addr) {
