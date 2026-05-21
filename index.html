@@ -511,9 +511,6 @@ async function syncData(silent=false) {
 }
 
 // ═══ GEOCODING ═══
-// Haversine - fallback only
-function hvs(a,b,c,d){const R=6371,dl=(c-a)*Math.PI/180,do_=(d-b)*Math.PI/180,e=Math.sin(dl/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(do_/2)**2;return R*2*Math.atan2(Math.sqrt(e),Math.sqrt(1-e));}
-function calcDistStraight(k){if(k.lat&&k.lng){k.dist_san=hvs(BASES.産基會.lat,BASES.産基會.lng,k.lat,k.lng);k.dist_he=hvs(BASES.河堤.lat,BASES.河堤.lng,k.lat,k.lng);}}
 
 // Distance Matrix using Google Maps JS DistanceMatrixService (browser-safe, no CORS)
 function fetchBicyclingDists() {
@@ -550,11 +547,7 @@ function fetchBicyclingDists() {
             if (heEl?.status  === 'OK') k.dist_he_bike  = heEl.distance.value  / 1000;
           });
         }
-        // Fallback to straight-line for any that failed
-        batchKG.forEach(k => {
-          if (k.dist_san_bike == null) k.dist_san_bike = k.dist_san;
-          if (k.dist_he_bike  == null) k.dist_he_bike  = k.dist_he;
-        });
+        // No fallback to straight-line - show — if bike dist unavailable
         done++;
         if (done >= totalBatches) {
           localStorage.setItem('kg_data', JSON.stringify(KG));
@@ -586,11 +579,11 @@ async function geocodeAll() {
   let changed=false;
   for(let i=0;i<KG.length;i+=4){
     await Promise.all(KG.slice(i,i+4).map(async k=>{
-      if(k.lat && k.dist_san!=null) return;
+      if(k.lat && k.dist_san_bike!=null) return;
       const loc = k.lat ? {lat:k.lat, lng:k.lng} : await geocodeOne(k.address);
       if(loc){
         k.lat=loc.lat; k.lng=loc.lng;
-        calcDistStraight(k);  // straight-line as initial estimate
+        // distances will be set by fetchBicyclingDists, not straight-line
         changed=true;
       }
     }));
@@ -671,8 +664,8 @@ function getSorted() {
     case 'custom':    arr.sort((a,b)=>skip(a)-skip(b)||(customRanks[a.id]??999)-(customRanks[b.id]??999)||a.id-b.id);break;
     case 'price-asc': arr.sort((a,b)=>skip(a)-skip(b)||(a.price||9999)-(b.price||9999));break;
     case 'price-desc':arr.sort((a,b)=>skip(a)-skip(b)||(b.price||0)-(a.price||0));break;
-    case 'dist-san':  arr.sort((a,b)=>skip(a)-skip(b)||((a.dist_san_bike??a.dist_san??999))-(b.dist_san_bike??b.dist_san??999));break;
-    case 'dist-he':   arr.sort((a,b)=>skip(a)-skip(b)||((a.dist_he_bike??a.dist_he??999))-(b.dist_he_bike??b.dist_he??999));break;
+    case 'dist-san':  arr.sort((a,b)=>skip(a)-skip(b)||((a.dist_san_bike??999))-(b.dist_san_bike??999));break;
+    case 'dist-he':   arr.sort((a,b)=>skip(a)-skip(b)||((a.dist_he_bike??999))-(b.dist_he_bike??999));break;
     case 'status':    arr.sort((a,b)=>(STATUS_ORDER[b.status]||0)-(STATUS_ORDER[a.status]||0));break;
     default:          arr.sort((a,b)=>skip(a)-skip(b)||a.id-b.id);
   }
@@ -713,8 +706,8 @@ function cardHTML(k) {
   <div class="card-meta">
     <div class="meta-item"><div class="meta-label">月費</div><div class="meta-value price">${k.price?'NT$ '+fmtN(k.price):'—'}</div></div>
     <div class="meta-item"><div class="meta-label">2歲名額</div><div class="meta-value">${k.quota||'—'} 人</div></div>
-    <div class="meta-item"><div class="meta-label">産基會</div><div class="meta-value dist"><span style="color:var(--accent)">産</span> ${fmtD(k.dist_san_bike??k.dist_san)}</div></div>
-    <div class="meta-item"><div class="meta-label">河堤</div><div class="meta-value dist"><span style="color:#1565c0">河</span> ${fmtD(k.dist_he_bike??k.dist_he)}</div></div>
+    <div class="meta-item"><div class="meta-label">産基會</div><div class="meta-value dist"><span style="color:var(--accent)">産</span> ${fmtD(k.dist_san_bike)}</div></div>
+    <div class="meta-item"><div class="meta-label">河堤</div><div class="meta-value dist"><span style="color:#1565c0">河</span> ${fmtD(k.dist_he_bike)}</div></div>
   </div>
   ${tagsRow}
   <div class="card-address">📍 <span>${k.address}</span></div>
@@ -792,7 +785,7 @@ function refreshMapMarkers(iwRef) {
         <span style="font-size:11px;color:#666">${k.address}</span><br>
         <span style="font-size:12px">${k.price?'NT$ '+fmtN(k.price)+'/月':'月費未知'}</span><br>
         ${k.extTime?`<span style="font-size:11px">延拖至 ${k.extTime}</span><br>`:''}
-        <span style="font-size:11px;color:#888">🚲 産 ${fmtD(k.dist_san_bike??k.dist_san)} ｜ 河 ${fmtD(k.dist_he_bike??k.dist_he)}</span><br>
+        <span style="font-size:11px;color:#888">🚲 産 ${fmtD(k.dist_san_bike)} ｜ 河 ${fmtD(k.dist_he_bike)}</span><br>
         <span style="font-size:11px;padding:2px 6px;border-radius:8px;background:${col}30;display:inline-block;margin-top:2px">${k.status}</span>
       </div>`);
       iw.open(gMap,m);
