@@ -313,8 +313,8 @@ const SHEET_GID = '31722594';
 const CSV_URL   = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SHEET_GID}`;
 
 const BASES = {
-  産基會:{ name:'産基會', lat:25.0326, lng:121.5458, addr:'臺北市大安區四維路198巷39弄14號' },
-  河堤:  { name:'河堤',   lat:25.0130, lng:121.5295, addr:'臺北市中正區汀州路二段180號' }
+  産基會:{ name:'産基會', lat:25.027742643866297, lng:121.54543294900475, addr:'臺北市大安區四維路198巷39弄14號' },
+  河堤:  { name:'河堤',   lat:25.0234343433143,   lng:121.52241173121837, addr:'臺北市中正區汀州路二段180號' }
 };
 const STATUS_COLORS = {'未打電話':'#ffd600','不去':'#9e9e9e','已預約':'#42a5f5','已參觀':'#66bb6a','已登記':'#ba68c8'};
 const STATUS_ORDER  = {'已登記':4,'已參觀':3,'已預約':2,'未打電話':1,'不去':0};
@@ -511,8 +511,51 @@ async function syncData(silent=false) {
 }
 
 // ═══ GEOCODING ═══
+// Haversine - fallback only
 function hvs(a,b,c,d){const R=6371,dl=(c-a)*Math.PI/180,do_=(d-b)*Math.PI/180,e=Math.sin(dl/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(do_/2)**2;return R*2*Math.atan2(Math.sqrt(e),Math.sqrt(1-e));}
-function calcDist(k){if(k.lat&&k.lng){k.dist_san=hvs(BASES.産基會.lat,BASES.産基會.lng,k.lat,k.lng);k.dist_he=hvs(BASES.河堤.lat,BASES.河堤.lng,k.lat,k.lng);}}
+function calcDistStraight(k){if(k.lat&&k.lng){k.dist_san=hvs(BASES.産基會.lat,BASES.産基會.lng,k.lat,k.lng);k.dist_he=hvs(BASES.河堤.lat,BASES.河堤.lng,k.lat,k.lng);}}
+
+// Distance Matrix API - bicycling mode, batched
+async function fetchBicyclingDists() {
+  // Check if all KG already have bike distances cached
+  const needUpdate = KG.filter(k => k.lat && k.lng && k.dist_san_bike == null);
+  if (!needUpdate.length) return;
+
+  const origins = [
+    `${BASES.産基會.lat},${BASES.産基會.lng}`,
+    `${BASES.河堤.lat},${BASES.河堤.lng}`
+  ].join('|').replace(/産基会/g,'産基會');
+
+  // Process in batches of 10 (API limit 25 destinations per request)
+  const BATCH = 10;
+  for (let i = 0; i < needUpdate.length; i += BATCH) {
+    const batch = needUpdate.slice(i, i + BATCH);
+    const dests = batch.map(k => `${k.lat},${k.lng}`).join('|');
+    const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(
+      `${BASES.産基會.lat},${BASES.産基會.lng}|${BASES.河堤.lat},${BASES.河堤.lng}`
+    )}&destinations=${encodeURIComponent(dests)}&mode=bicycling&language=zh-TW&key=${MAPS_KEY}`;
+
+    try {
+      const data = await (await fetch(url)).json();
+      if (data.status === 'OK') {
+        batch.forEach((k, j) => {
+          const sanEl = data.rows[0]?.elements[j];
+          const heEl  = data.rows[1]?.elements[j];
+          if (sanEl?.status === 'OK') k.dist_san_bike = sanEl.distance.value / 1000;
+          if (heEl?.status  === 'OK') k.dist_he_bike  = heEl.distance.value  / 1000;
+          // Fallback to straight-line if API fails for this element
+          if (k.dist_san_bike == null) k.dist_san_bike = k.dist_san;
+          if (k.dist_he_bike  == null) k.dist_he_bike  = k.dist_he;
+        });
+      }
+    } catch(e) {
+      console.warn('Distance Matrix error:', e);
+      // Fallback to straight-line
+      batch.forEach(k => { k.dist_san_bike = k.dist_san; k.dist_he_bike = k.dist_he; });
+    }
+  }
+  localStorage.setItem('kg_data', JSON.stringify(KG));
+}
 
 async function geocodeOne(addr) {
   const c=geocodeCache[addr]; if(c&&c.lat) return c;
@@ -529,17 +572,24 @@ async function geocodeOne(addr) {
 }
 
 async function geocodeAll() {
-  document.getElementById('loading-sub').textContent='計算精確距離中…';
+  document.getElementById('loading-sub').textContent='定位幼兒園座標中…';
   let changed=false;
   for(let i=0;i<KG.length;i+=4){
     await Promise.all(KG.slice(i,i+4).map(async k=>{
-      // Re-geocode if no coords, OR if coords exist but distances are missing
       if(k.lat && k.dist_san!=null) return;
       const loc = k.lat ? {lat:k.lat, lng:k.lng} : await geocodeOne(k.address);
-      if(loc){k.lat=loc.lat;k.lng=loc.lng;calcDist(k);changed=true;}
+      if(loc){
+        k.lat=loc.lat; k.lng=loc.lng;
+        calcDistStraight(k);  // straight-line as initial estimate
+        changed=true;
+      }
     }));
   }
   if(changed) localStorage.setItem('kg_data',JSON.stringify(KG));
+
+  // Now fetch real bicycling distances via Distance Matrix API
+  document.getElementById('loading-sub').textContent='計算騎車距離中…';
+  await fetchBicyclingDists();
 }
 
 // ═══ HELPERS ═══
@@ -611,8 +661,8 @@ function getSorted() {
     case 'custom':    arr.sort((a,b)=>skip(a)-skip(b)||(customRanks[a.id]??999)-(customRanks[b.id]??999)||a.id-b.id);break;
     case 'price-asc': arr.sort((a,b)=>skip(a)-skip(b)||(a.price||9999)-(b.price||9999));break;
     case 'price-desc':arr.sort((a,b)=>skip(a)-skip(b)||(b.price||0)-(a.price||0));break;
-    case 'dist-san':  arr.sort((a,b)=>skip(a)-skip(b)||(a.dist_san??999)-(b.dist_san??999));break;
-    case 'dist-he':   arr.sort((a,b)=>skip(a)-skip(b)||(a.dist_he??999)-(b.dist_he??999));break;
+    case 'dist-san':  arr.sort((a,b)=>skip(a)-skip(b)||((a.dist_san_bike??a.dist_san??999))-(b.dist_san_bike??b.dist_san??999));break;
+    case 'dist-he':   arr.sort((a,b)=>skip(a)-skip(b)||((a.dist_he_bike??a.dist_he??999))-(b.dist_he_bike??b.dist_he??999));break;
     case 'status':    arr.sort((a,b)=>(STATUS_ORDER[b.status]||0)-(STATUS_ORDER[a.status]||0));break;
     default:          arr.sort((a,b)=>skip(a)-skip(b)||a.id-b.id);
   }
@@ -653,8 +703,8 @@ function cardHTML(k) {
   <div class="card-meta">
     <div class="meta-item"><div class="meta-label">月費</div><div class="meta-value price">${k.price?'NT$ '+fmtN(k.price):'—'}</div></div>
     <div class="meta-item"><div class="meta-label">2歲名額</div><div class="meta-value">${k.quota||'—'} 人</div></div>
-    <div class="meta-item"><div class="meta-label">産基會</div><div class="meta-value dist"><span style="color:var(--accent)">産</span> ${fmtD(k.dist_san)}</div></div>
-    <div class="meta-item"><div class="meta-label">河堤</div><div class="meta-value dist"><span style="color:#1565c0">河</span> ${fmtD(k.dist_he)}</div></div>
+    <div class="meta-item"><div class="meta-label">産基會</div><div class="meta-value dist"><span style="color:var(--accent)">産</span> ${fmtD(k.dist_san_bike??k.dist_san)}</div></div>
+    <div class="meta-item"><div class="meta-label">河堤</div><div class="meta-value dist"><span style="color:#1565c0">河</span> ${fmtD(k.dist_he_bike??k.dist_he)}</div></div>
   </div>
   ${tagsRow}
   <div class="card-address">📍 <span>${k.address}</span></div>
@@ -732,7 +782,7 @@ function refreshMapMarkers(iwRef) {
         <span style="font-size:11px;color:#666">${k.address}</span><br>
         <span style="font-size:12px">${k.price?'NT$ '+fmtN(k.price)+'/月':'月費未知'}</span><br>
         ${k.extTime?`<span style="font-size:11px">延拖至 ${k.extTime}</span><br>`:''}
-        <span style="font-size:11px;color:#888">産 ${fmtD(k.dist_san)} ｜ 河 ${fmtD(k.dist_he)}</span><br>
+        <span style="font-size:11px;color:#888">🚲 産 ${fmtD(k.dist_san_bike??k.dist_san)} ｜ 河 ${fmtD(k.dist_he_bike??k.dist_he)}</span><br>
         <span style="font-size:11px;padding:2px 6px;border-radius:8px;background:${col}30;display:inline-block;margin-top:2px">${k.status}</span>
       </div>`);
       iw.open(gMap,m);
