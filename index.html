@@ -421,46 +421,49 @@ function parseSheetData(csvText) {
   const result = [];
   let region = '';
 
+  // CONFIRMED from actual CSV export:
+  // 0:name 1:status 2:抽籤結果 3:news 4:extTime 5:eng 6:engNote
+  // 7:art 8:artNote 9:price 10:地址[定位] 11:地址
+  // 12:quota 13:total 14:semFee 15:extFee 16:brochure
+  // 17:visitDate 18:regDate 19:drawDate 20:reportDate
+  // In CSV: time="18:00" string, dates="5/8" string, price=plain number
+
   for (const row of rows) {
     const rawName = (row[0]||'').trim();
-    // Detect region rows (col 0 has region, cols 1+ empty)
-    if(rawName && !row.slice(1,11).some(c=>c&&c.trim())) {
-      if(/大安區|中正區|信義區|較遠/.test(rawName)) { region = rawName; }
+
+    // Region label: col 0 has text, all of cols 1-10 empty
+    if (rawName && !row.slice(1,11).some(c => c && c.trim())) {
+      if (/大安區|中正區|信義區|較遠/.test(rawName)) region = rawName;
       continue;
     }
-    // Skip header rows
-    if(rawName==='幼兒園') continue;
+    // Skip header rows (col 0 = "幼兒園")
+    if (rawName === '幼兒園') continue;
     // Validate
-    if(!isValidKG(row)) continue;
+    if (!isValidKG(row)) continue;
 
-    // Clean name: take first line only (some have \n in the cell)
     const name = rawName.split('\n')[0].trim();
-
-    // COLUMN MAPPING (confirmed from xlsx analysis):
-    // 0:name  1:status  2:抽籤結果  3:news  4:extTime  5:eng  6:engNote
-    // 7:art   8:artNote  9:price  10:地址[定位]  11:地址
-    // 12:quota 13:total 14:semFee 15:extFee 16:brochure
-    // 17:visitDate 18:regDate 19:drawDate 20:reportDate 21:note 22:visitTime
+    // Strip commas from numbers (CSV may quote "1,500" but parser keeps the comma inside)
+    const cleanNum = v => parseFloat((v||'').replace(/,/g,'')) || null;
 
     result.push({
       id: result.length,
       name,
-      status:    normStatus(row[1]),
-      drawResult:(row[2]||'').trim(),  // 抽籤結果 from Sheet col C
-      news:      (row[3]||'').trim(),
-      extTime:   xlTime(row[4]),
-      eng:       (row[5]||'').trim(),
-      engNote:   (row[6]||'').trim(),
-      art:       (row[7]||'').trim(),
-      artNote:   (row[8]||'').trim(),
-      price:     parseFloat(row[9])||null,
-      address:   (row[10]||'').trim(),  // 地址[定位] as display address
-      quota:     parseFloat(row[12])||null,
-      total:     parseFloat(row[13])||null,
-      visitDate: normDate(row[17]),
-      regDate:   normDate(row[18]),
-      drawDate:  normDate(row[19]),
-      reportDate:normDate(row[20]),
+      status:     normStatus(row[1]),
+      drawResult: (row[2]||'').trim(),
+      news:       (row[3]||'').trim(),
+      extTime:    xlTime(row[4]),
+      eng:        (row[5]||'').trim(),
+      engNote:    (row[6]||'').trim(),
+      art:        (row[7]||'').trim(),
+      artNote:    (row[8]||'').trim(),
+      price:      cleanNum(row[9]),
+      address:    (row[10]||row[11]||'').trim(),
+      quota:      cleanNum(row[12]),
+      total:      cleanNum(row[13]),
+      visitDate:  normDate(row[17]),
+      regDate:    normDate(row[18]),
+      drawDate:   normDate(row[19]),
+      reportDate: normDate(row[20]),
       region,
       lat:null, lng:null, dist_san:null, dist_he:null,
     });
@@ -530,8 +533,9 @@ async function geocodeAll() {
   let changed=false;
   for(let i=0;i<KG.length;i+=4){
     await Promise.all(KG.slice(i,i+4).map(async k=>{
-      if(k.lat) return;
-      const loc=await geocodeOne(k.address);
+      // Re-geocode if no coords, OR if coords exist but distances are missing
+      if(k.lat && k.dist_san!=null) return;
+      const loc = k.lat ? {lat:k.lat, lng:k.lng} : await geocodeOne(k.address);
       if(loc){k.lat=loc.lat;k.lng=loc.lng;calcDist(k);changed=true;}
     }));
   }
@@ -539,7 +543,17 @@ async function geocodeAll() {
 }
 
 // ═══ HELPERS ═══
-function fmtD(n){return n==null?'—':n<1?(n*1000).toFixed(0)+'m':n.toFixed(1)+'km';}
+// Format number with #,### comma separators
+function fmtN(n, decimals=0) {
+  if(n==null||isNaN(n)) return '—';
+  return n.toLocaleString('zh-TW', {minimumFractionDigits:decimals, maximumFractionDigits:decimals});
+}
+// Format distance: km with 1 decimal if >=1km, meters if <1km
+function fmtD(n) {
+  if(n==null) return '—';
+  if(n < 1) return fmtN(Math.round(n*1000)) + ' m';
+  return fmtN(n, 1) + ' km';
+}
 
 function parseDates(str) {
   if(!str) return [];
@@ -637,7 +651,7 @@ function cardHTML(k) {
     <div class="status-badge">${k.status}</div>
   </div>
   <div class="card-meta">
-    <div class="meta-item"><div class="meta-label">月費</div><div class="meta-value price">${k.price?'NT$'+k.price.toLocaleString():'—'}</div></div>
+    <div class="meta-item"><div class="meta-label">月費</div><div class="meta-value price">${k.price?'NT$ '+fmtN(k.price):'—'}</div></div>
     <div class="meta-item"><div class="meta-label">2歲名額</div><div class="meta-value">${k.quota||'—'} 人</div></div>
     <div class="meta-item"><div class="meta-label">産基會</div><div class="meta-value dist"><span style="color:var(--accent)">産</span> ${fmtD(k.dist_san)}</div></div>
     <div class="meta-item"><div class="meta-label">河堤</div><div class="meta-value dist"><span style="color:#1565c0">河</span> ${fmtD(k.dist_he)}</div></div>
@@ -666,7 +680,7 @@ function renderSortTable() {
         ${k.drawResult||'—'}</td>
       <td style="font-weight:500;font-size:12px">${k.name.replace(/臺北市私立|臺北市/g,'')}</td>
       <td style="font-size:11px;color:var(--ink-muted)">${k.region}</td>
-      <td>${k.price?'NT$'+k.price.toLocaleString():'—'}</td>
+      <td>${k.price?'NT$ '+fmtN(k.price):'—'}</td>
       <td style="font-size:12px">${k.extTime||'—'}</td>
       <td style="font-size:11px"><span style="color:${k.eng==='有'?'#2e7d32':k.eng==='無'?'#bbb':'#ccc'}">${k.eng||'—'}</span>${k.engNote?`<br><span style="font-size:10px;color:var(--ink-muted)">${k.engNote}</span>`:''}</td>
       <td style="font-size:11px"><span style="color:${k.art==='有'?'#e65100':k.art==='無'?'#bbb':'#ccc'}">${k.art||'—'}</span>${k.artNote?`<br><span style="font-size:10px;color:var(--ink-muted)">${k.artNote}</span>`:''}</td>
@@ -716,7 +730,7 @@ function refreshMapMarkers(iwRef) {
       iw.setContent(`<div style="font-family:sans-serif;padding:4px;max-width:230px">
         <strong>${k.name.replace(/臺北市私立|臺北市/g,'')}</strong>${k.drawResult?` <span style="font-size:11px;color:#6a1b9a">[${k.drawResult}]</span>`:''}<br>
         <span style="font-size:11px;color:#666">${k.address}</span><br>
-        <span style="font-size:12px">${k.price?'NT$'+k.price.toLocaleString()+'/月':'月費未知'}</span><br>
+        <span style="font-size:12px">${k.price?'NT$ '+fmtN(k.price)+'/月':'月費未知'}</span><br>
         ${k.extTime?`<span style="font-size:11px">延拖至 ${k.extTime}</span><br>`:''}
         <span style="font-size:11px;color:#888">産 ${fmtD(k.dist_san)} ｜ 河 ${fmtD(k.dist_he)}</span><br>
         <span style="font-size:11px;padding:2px 6px;border-radius:8px;background:${col}30;display:inline-block;margin-top:2px">${k.status}</span>
