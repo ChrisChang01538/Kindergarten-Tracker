@@ -58,27 +58,27 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--cream);color:var(--i
 .card{background:white;border-radius:var(--radius);border:1.5px solid var(--cream-border);overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;display:flex;flex-direction:column;}
 .card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(44,36,22,0.1);}
 .card.dimmed{opacity:0.45;}
-.card-status-bar{height:4px;width:100%;}
-.s-未打電話 .card-status-bar,.s-未打 .card-status-bar{background:var(--s-none);}
+.card-status-bar{height:4px;}
+.s-未打電話 .card-status-bar{background:var(--s-none);}
 .s-不去 .card-status-bar{background:var(--s-skip);}
 .s-已預約 .card-status-bar{background:var(--s-appt);}
 .s-已參觀 .card-status-bar{background:var(--s-vis);}
 .s-已登記 .card-status-bar{background:var(--s-reg);}
 .card-header{padding:13px 15px 9px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
-.card-name{font-family:'Noto Serif TC',serif;font-size:14px;font-weight:600;line-height:1.4;flex:1;}
-.card-name-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
-.result-badge{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:4px;white-space:nowrap;}
-.result-錄取{background:#e8f5e9;color:#1b5e20;border:1px solid #a5d6a7;}
-.result-未錄取{background:#ffebee;color:#b71c1c;border:1px solid #ef9a9a;}
-.result-備取{background:#fff8e1;color:#e65100;border:1px solid #ffcc80;}
-.result-候補{background:#fff8e1;color:#e65100;border:1px solid #ffcc80;}
-.result-other{background:#f3e5f5;color:#4a148c;border:1px solid #ce93d8;}
+.card-name{font-family:'Noto Serif TC',serif;font-size:14px;font-weight:600;line-height:1.5;flex:1;}
+.card-name-badges{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:4px;}
 .status-badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:18px;white-space:nowrap;flex-shrink:0;}
-.s-未打電話 .status-badge,.s-未打 .status-badge{background:var(--s-none-bg);color:#795548;border:1px solid var(--s-none-bd);}
+.s-未打電話 .status-badge{background:var(--s-none-bg);color:#795548;border:1px solid var(--s-none-bd);}
 .s-不去 .status-badge{background:var(--s-skip-bg);color:#616161;border:1px solid var(--s-skip-bd);}
 .s-已預約 .status-badge{background:var(--s-appt-bg);color:#1565c0;border:1px solid var(--s-appt-bd);}
 .s-已參觀 .status-badge{background:var(--s-vis-bg);color:#2e7d32;border:1px solid var(--s-vis-bd);}
 .s-已登記 .status-badge{background:var(--s-reg-bg);color:#6a1b9a;border:1px solid var(--s-reg-bd);}
+.result-badge{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:4px;white-space:nowrap;}
+.res-錄取{background:#e8f5e9;color:#1b5e20;border:1px solid #a5d6a7;}
+.res-備取{background:#fff8e1;color:#e65100;border:1px solid #ffcc80;}
+.res-未錄取{background:#ffebee;color:#b71c1c;border:1px solid #ef9a9a;}
+.res-other{background:#f3e5f5;color:#4a148c;border:1px solid #ce93d8;}
+.rank-badge{background:var(--accent);color:white;font-size:9.5px;font-weight:700;padding:2px 6px;border-radius:8px;}
 .card-meta{padding:0 15px 11px;display:grid;grid-template-columns:1fr 1fr;gap:7px;}
 .meta-item{display:flex;flex-direction:column;gap:2px;}
 .meta-label{font-size:9.5px;color:var(--ink-muted);letter-spacing:0.3px;font-weight:500;text-transform:uppercase;}
@@ -108,12 +108,10 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--cream);color:var(--i
 .sort-table-wrap{background:white;border-radius:var(--radius);border:1.5px solid var(--cream-border);overflow:hidden;overflow-x:auto;}
 .sort-table{width:100%;border-collapse:collapse;}
 .sort-table th{background:var(--cream-dark);padding:10px 13px;font-size:11.5px;font-weight:600;color:var(--ink-light);text-align:left;white-space:nowrap;}
-.sort-table td{padding:9px 13px;border-top:1px solid var(--cream-border);font-size:12.5px;vertical-align:middle;}
+.sort-table td{padding:9px 13px;border-top:1px solid var(--cream-border);font-size:12px;vertical-align:middle;}
 .sort-table tr:hover td{background:var(--cream);}
 .rank-input{width:55px;padding:4px 7px;border:1.5px solid var(--cream-border);border-radius:6px;font-size:13px;font-family:'Noto Sans TC',sans-serif;text-align:center;color:var(--ink);}
 .rank-input:focus{outline:none;border-color:var(--accent);}
-.result-input{width:80px;padding:4px 7px;border:1.5px solid var(--cream-border);border-radius:6px;font-size:12px;font-family:'Noto Sans TC',sans-serif;color:var(--ink);}
-.result-input:focus{outline:none;border-color:var(--accent);}
 .btn-row{margin-top:13px;display:flex;gap:9px;}
 .btn-primary{padding:8px 20px;background:var(--accent);color:white;border:none;border-radius:7px;font-family:'Noto Sans TC',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
 .btn-primary:hover{background:#a0662e;}
@@ -186,7 +184,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--cream);color:var(--i
     <div class="nav-item" data-page="map" onclick="switchPage('map')"><span class="nav-icon">🗺️</span><span>地圖標示</span></div>
     <div class="nav-item" data-page="calendar" onclick="switchPage('calendar')"><span class="nav-icon">📅</span><span>行事曆</span></div>
   </div>
-  <div class="sidebar-bottom">v4.0 · ChrisChang01538</div>
+  <div class="sidebar-bottom">v5.0 · ChrisChang01538</div>
 </nav>
 
 <div id="main">
@@ -239,13 +237,13 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--cream);color:var(--i
   <div class="page" id="page-sort">
     <div class="topbar"><div class="topbar-left"><div class="topbar-title">自訂排序</div></div></div>
     <div class="page-content">
-      <p style="font-size:12.5px;color:var(--ink-light);margin-bottom:14px">填入序位數字（越小越前面）；抽籤結果欄可填入如「錄取」「備取1」「未錄取」等，會顯示在首頁 card 名稱旁。「不去」預設置底淡化。</p>
+      <p style="font-size:12.5px;color:var(--ink-light);margin-bottom:14px">填入序位數字（越小越前面）。抽籤結果從 Google Sheet C 欄自動讀取，顯示在 card 名稱旁。「不去」預設置底淡化。</p>
       <div class="sort-table-wrap">
         <table class="sort-table">
           <thead>
             <tr>
               <th style="width:65px">序位</th>
-              <th style="width:90px">抽籤結果</th>
+              <th>抽籤結果</th>
               <th>幼兒園</th>
               <th>地區</th>
               <th>月費</th>
@@ -259,8 +257,8 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--cream);color:var(--i
         </table>
       </div>
       <div class="btn-row">
-        <button class="btn-primary" onclick="saveCustomData()">✓ 套用</button>
-        <button class="btn-secondary" onclick="clearAll()">清除全部</button>
+        <button class="btn-primary" onclick="saveRanks()">✓ 套用排序</button>
+        <button class="btn-secondary" onclick="clearRanks()">清除序位</button>
       </div>
     </div>
   </div>
@@ -308,7 +306,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--cream);color:var(--i
 </div>
 
 <script>
-// ═══════════════ CONFIG ═══════════════
+// ═══ CONFIG ═══
 const MAPS_KEY  = 'AIzaSyA8PCRPBomJXmyxuTZFwbcrxT1NC_7cX5o';
 const SHEET_ID  = '1DO2KnafgEbx3mGysiS7Ta16Zn_ddBmh_k0Jhn6F5Bso';
 const SHEET_GID = '31722594';
@@ -318,68 +316,104 @@ const BASES = {
   産基會:{ name:'産基會', lat:25.0326, lng:121.5458, addr:'臺北市大安區四維路198巷39弄14號' },
   河堤:  { name:'河堤',   lat:25.0130, lng:121.5295, addr:'臺北市中正區汀州路二段180號' }
 };
-const STATUS_COLORS = {'未打電話':'#ffd600','未打':'#ffd600','不去':'#9e9e9e','已預約':'#42a5f5','已參觀':'#66bb6a','已登記':'#ba68c8'};
-const STATUS_ORDER  = {'已登記':4,'已參觀':3,'已預約':2,'未打電話':1,'未打':1,'不去':0};
+const STATUS_COLORS = {'未打電話':'#ffd600','不去':'#9e9e9e','已預約':'#42a5f5','已參觀':'#66bb6a','已登記':'#ba68c8'};
+const STATUS_ORDER  = {'已登記':4,'已參觀':3,'已預約':2,'未打電話':1,'不去':0};
 
-// ═══════════════ STATE ═══════════════
+// ═══ STATE ═══
 let KG = [];
 let customRanks  = JSON.parse(localStorage.getItem('kg_ranks')    || '{}');
-let customResults= JSON.parse(localStorage.getItem('kg_results')  || '{}'); // id→result string
 let memos        = JSON.parse(localStorage.getItem('kg_memos')    || '[]');
 let geocodeCache = JSON.parse(localStorage.getItem('kg_geocache') || '{}');
 let currentFilter = 'all';
 let calYear = new Date().getFullYear(), calMonth = new Date().getMonth();
 let mapInit = false, gMap = null, mapMarkers = [];
 
-// ═══════════════ CSV PARSER ═══════════════
+// ═══ CSV PARSER ═══
 function parseCSV(text) {
   const rows=[]; let cur='', inQ=false, row=[];
   for (let i=0; i<=text.length; i++) {
     const c=text[i];
-    if(c===undefined){row.push(cur);rows.push(row);break;}
+    if(c===undefined){row.push(cur);if(row.some(x=>x.trim()))rows.push(row);break;}
     if(c==='"'){if(inQ&&text[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
     else if(c===','&&!inQ){row.push(cur);cur='';}
-    else if((c==='\n'||c==='\r')&&!inQ){row.push(cur);cur='';rows.push(row);row=[];if(c==='\r'&&text[i+1]==='\n')i++;}
-    else cur+=c;
+    else if((c==='\n'||c==='\r')&&!inQ){
+      row.push(cur);cur='';
+      if(row.some(x=>x.trim()))rows.push(row);
+      row=[];
+      if(c==='\r'&&text[i+1]==='\n')i++;
+    } else cur+=c;
   }
-  return rows.filter(r=>r.some(c=>c.trim()));
+  return rows;
 }
 
-// ── CRITICAL: identify a kindergarten row vs a header/region row
-// A valid KG row must:
-//   1. Have col 0 with "幼兒園" in the name (園/幼/私立/附設)
-//   2. Have col 9 (地址[定位]) OR col 10 (地址) non-empty
-//   3. NOT be a pure region label (大安區/中正區/信義區/較遠 with no address)
-function isKGRow(row) {
-  const name = (row[0]||'').trim();
-  if (!name || name.length < 3) return false;
-  // Must contain kindergarten-related keywords
-  const isKG = /幼兒園|幼稚園|附設|私立|市立/.test(name);
-  if (!isKG) return false;
-  // Must have geo address or display address
-  const geoAddr = (row[9]||'').trim();
-  const dispAddr = (row[10]||'').trim();
-  if (!geoAddr && !dispAddr) return false;
-  return true;
+// ── Excel serial date → "YYYY-MM-DD"
+function xlDate(v) {
+  const n = parseInt(v);
+  if(isNaN(n)||n<40000||n>50000) return null; // not a plausible date serial
+  // Excel serial: days since 1900-01-00, with leap year bug (day 60 doesn't exist)
+  const d = new Date(Date.UTC(1899,11,30) + (n>60?n:n-1)*86400000);
+  return d.toISOString().slice(0,10);
 }
 
-// Excel time serial → "HH:MM"  e.g. 0.7916 → "19:00"
+// ── Excel time fraction → "HH:MM"
+// Handles: 0.7916 (fraction <1), 1700.0 (HHMM integer), "19:00" (already string)
 function xlTime(v) {
-  if (!v) return null;
-  const n = parseFloat(v);
-  if (isNaN(n) || n <= 0 || n >= 1) return typeof v==='string'&&v.includes(':')? v : null;
-  const mins = Math.round(n * 1440);
-  return `${String(Math.floor(mins/60)).padStart(2,'0')}:${String(mins%60).padStart(2,'0')}`;
+  if(!v||v==='') return null;
+  const s = String(v).trim();
+  // Already formatted
+  if(/^\d{1,2}:\d{2}/.test(s)) return s.slice(0,5);
+  const n = parseFloat(s);
+  if(isNaN(n)) return null;
+  // HHMM integer like 1700, 1800, 1930
+  if(n >= 100 && n <= 2359 && Number.isInteger(n)) {
+    const h=Math.floor(n/100), m=n%100;
+    if(h<=23&&m<=59) return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+  }
+  // Excel time fraction 0–1
+  if(n>0&&n<1) {
+    const mins=Math.round(n*1440);
+    return `${String(Math.floor(mins/60)).padStart(2,'0')}:${String(mins%60).padStart(2,'0')}`;
+  }
+  return null;
+}
+
+// ── Normalise date field: may be serial, ISO, or text like "5/26-5/29"
+function normDate(v) {
+  if(!v||v==='') return '';
+  // Try serial first
+  const d = xlDate(v);
+  if(d) return d;
+  return v.trim();
 }
 
 function normStatus(s) {
   s=(s||'').trim();
-  if(!s||s==='未打電話'||s==='未打'||s==='螢光未打電話') return '未打電話';
+  if(!s||s==='未打電話'||s==='螢光未打電話') return '未打電話';
   if(s==='不去') return '不去';
   if(s==='已預約') return '已預約';
   if(s==='已參觀') return '已參觀';
   if(s==='已登記') return '已登記';
   return '未打電話';
+}
+
+// ── Strict KG row validation
+// Col 0: name must contain kindergarten keywords AND be multi-char
+// Col 10: 地址[定位] must be non-empty
+// Ignore region labels, header rows, "私立", "強恕" (no status)
+function isValidKG(row) {
+  const name = (row[0]||'').trim();
+  const status = (row[1]||'').trim();
+  const geoAddr = (row[10]||'').trim();
+  // Must have a name with KG-related content
+  if(!name||name.length<3) return false;
+  // Reject pure region labels
+  if(/^(大安區|中正區|信義區|較遠|私立$)/.test(name)&&!geoAddr) return false;
+  // Must have geo address
+  if(!geoAddr) return false;
+  // Must have a recognisable status (or be a KG with address)
+  const hasKGKeyword = /幼兒園|幼稚園|附設|私立|強恕|惠真|聖約翰|童馨|育樂|青年|佳安|歡樂/.test(name);
+  if(!hasKGKeyword) return false;
+  return true;
 }
 
 function parseSheetData(csvText) {
@@ -388,58 +422,53 @@ function parseSheetData(csvText) {
   let region = '';
 
   for (const row of rows) {
-    const f0 = (row[0]||'').trim();
-
-    // Detect region label rows (no kindergarten keywords, no address)
-    if (/大安區|中正區|信義區|較遠|私立$/.test(f0) && !isKGRow(row)) {
-      if (f0 !== '幼兒園') region = f0;
+    const rawName = (row[0]||'').trim();
+    // Detect region rows (col 0 has region, cols 1+ empty)
+    if(rawName && !row.slice(1,11).some(c=>c&&c.trim())) {
+      if(/大安區|中正區|信義區|較遠/.test(rawName)) { region = rawName; }
       continue;
     }
-    // Skip pure header rows
-    if (f0 === '幼兒園') continue;
-    // Skip non-KG rows
-    if (!isKGRow(row)) continue;
+    // Skip header rows
+    if(rawName==='幼兒園') continue;
+    // Validate
+    if(!isValidKG(row)) continue;
 
-    // Column mapping (Sheet v4):
-    // 0:name  1:status  2:news  3:extTime  4:eng  5:engNote
-    // 6:art   7:artNote 8:price 9:geoAddr  10:addr
-    // 11:quota 12:total 13:semFee 14:extFee 15:brochure
-    // 16:visitDate 17:regDate 18:drawDate 19:reportDate 20:note 21:visitTime
-    // (C column 抽籤結果 = user fills via UI, stored in localStorage)
+    // Clean name: take first line only (some have \n in the cell)
+    const name = rawName.split('\n')[0].trim();
 
-    const geoAddr = (row[9]||'').trim();
-    const dispAddr = (row[10]||geoAddr).trim();
-    const extTimeRaw = (row[3]||'').trim();
+    // COLUMN MAPPING (confirmed from xlsx analysis):
+    // 0:name  1:status  2:抽籤結果  3:news  4:extTime  5:eng  6:engNote
+    // 7:art   8:artNote  9:price  10:地址[定位]  11:地址
+    // 12:quota 13:total 14:semFee 15:extFee 16:brochure
+    // 17:visitDate 18:regDate 19:drawDate 20:reportDate 21:note 22:visitTime
 
     result.push({
       id: result.length,
-      name: f0,
-      status: normStatus(row[1]),
-      news: (row[2]||'').trim(),
-      extTime: xlTime(extTimeRaw),
-      eng: (row[4]||'').trim(),
-      engNote: (row[5]||'').trim(),
-      art: (row[6]||'').trim(),
-      artNote: (row[7]||'').trim(),
-      price: parseFloat(row[8])||null,
-      geoAddr: geoAddr || dispAddr,
-      address: geoAddr || dispAddr,   // ← use 地址[定位] as display address
-      quota: parseFloat(row[11])||null,
-      total: parseFloat(row[12])||null,
-      semFee: parseFloat(row[13])||null,
-      extFee: parseFloat(row[14])||null,
-      visitDate:  (row[16]||'').trim(),
-      regDate:    (row[17]||'').trim(),
-      drawDate:   (row[18]||'').trim(),
-      reportDate: (row[19]||'').trim(),
-      region: region,
+      name,
+      status:    normStatus(row[1]),
+      drawResult:(row[2]||'').trim(),  // 抽籤結果 from Sheet col C
+      news:      (row[3]||'').trim(),
+      extTime:   xlTime(row[4]),
+      eng:       (row[5]||'').trim(),
+      engNote:   (row[6]||'').trim(),
+      art:       (row[7]||'').trim(),
+      artNote:   (row[8]||'').trim(),
+      price:     parseFloat(row[9])||null,
+      address:   (row[10]||'').trim(),  // 地址[定位] as display address
+      quota:     parseFloat(row[12])||null,
+      total:     parseFloat(row[13])||null,
+      visitDate: normDate(row[17]),
+      regDate:   normDate(row[18]),
+      drawDate:  normDate(row[19]),
+      reportDate:normDate(row[20]),
+      region,
       lat:null, lng:null, dist_san:null, dist_he:null,
     });
   }
   return result;
 }
 
-// ═══════════════ SYNC ═══════════════
+// ═══ SYNC ═══
 async function syncData(silent=false) {
   const btn=document.getElementById('sync-btn');
   const icon=document.getElementById('sync-icon');
@@ -451,11 +480,14 @@ async function syncData(silent=false) {
     const data=parseSheetData(await r.text());
     if(!data.length) throw new Error('空資料');
 
-    // Restore cached coords by geoAddr key
+    // Restore coords from cache
     const cMap={};
-    KG.forEach(k=>{ if(k.lat) cMap[k.geoAddr]={lat:k.lat,lng:k.lng,ds:k.dist_san,dh:k.dist_he}; });
+    KG.forEach(k=>{ if(k.lat) cMap[k.address]={lat:k.lat,lng:k.lng,ds:k.dist_san,dh:k.dist_he}; });
     KG=data;
-    KG.forEach(k=>{ const c=cMap[k.geoAddr]||geocodeCache[k.geoAddr]; if(c&&c.lat){k.lat=c.lat;k.lng=c.lng;k.dist_san=c.ds??null;k.dist_he=c.dh??null;} });
+    KG.forEach(k=>{
+      const c=cMap[k.address]||geocodeCache[k.address];
+      if(c&&c.lat){k.lat=c.lat;k.lng=c.lng;k.dist_san=c.ds??null;k.dist_he=c.dh??null;}
+    });
 
     localStorage.setItem('kg_data',JSON.stringify(KG));
     const t=new Date(), ts=`${t.getHours()}:${String(t.getMinutes()).padStart(2,'0')}`;
@@ -475,16 +507,14 @@ async function syncData(silent=false) {
   }
 }
 
-// ═══════════════ GEOCODING ═══════════════
-function hvs(a,b,c,d){const R=6371,dL=(c-a)*Math.PI/180,dO=(d-b)*Math.PI/180,e=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dO/2)**2;return R*2*Math.atan2(Math.sqrt(e),Math.sqrt(1-e));}
+// ═══ GEOCODING ═══
+function hvs(a,b,c,d){const R=6371,dl=(c-a)*Math.PI/180,do_=(d-b)*Math.PI/180,e=Math.sin(dl/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(do_/2)**2;return R*2*Math.atan2(Math.sqrt(e),Math.sqrt(1-e));}
 function calcDist(k){if(k.lat&&k.lng){k.dist_san=hvs(BASES.産基會.lat,BASES.産基會.lng,k.lat,k.lng);k.dist_he=hvs(BASES.河堤.lat,BASES.河堤.lng,k.lat,k.lng);}}
 
 async function geocodeOne(addr) {
-  const cached=geocodeCache[addr];
-  if(cached&&cached.lat) return cached;
+  const c=geocodeCache[addr]; if(c&&c.lat) return c;
   try {
-    const u=`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(addr)}&key=${MAPS_KEY}&language=zh-TW&region=TW`;
-    const d=await(await fetch(u)).json();
+    const d=await(await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(addr)}&key=${MAPS_KEY}&language=zh-TW&region=TW`)).json();
     if(d.status==='OK'&&d.results[0]){
       const loc=d.results[0].geometry.location;
       geocodeCache[addr]=loc;
@@ -501,22 +531,25 @@ async function geocodeAll() {
   for(let i=0;i<KG.length;i+=4){
     await Promise.all(KG.slice(i,i+4).map(async k=>{
       if(k.lat) return;
-      const loc=await geocodeOne(k.geoAddr);
+      const loc=await geocodeOne(k.address);
       if(loc){k.lat=loc.lat;k.lng=loc.lng;calcDist(k);changed=true;}
     }));
   }
   if(changed) localStorage.setItem('kg_data',JSON.stringify(KG));
 }
 
-// ═══════════════ HELPERS ═══════════════
+// ═══ HELPERS ═══
 function fmtD(n){return n==null?'—':n<1?(n*1000).toFixed(0)+'m':n.toFixed(1)+'km';}
 
 function parseDates(str) {
   if(!str) return [];
   const yr=new Date().getFullYear(), res=[];
+  // ISO date
   if(/^\d{4}-\d{2}-\d{2}/.test(str)){const d=new Date(str.slice(0,10));if(!isNaN(d))res.push(d);return res;}
+  // M/D patterns
   const ms=str.match(/(\d{1,2})\/(\d{1,2})/g);
   if(ms)ms.forEach(m=>{const[mo,dy]=m.split('/').map(Number);if(mo>=1&&mo<=12&&dy>=1&&dy<=31){const d=new Date(yr,mo-1,dy);if(!isNaN(d))res.push(d);}});
+  // Chinese date
   const cm=str.match(/(\d{1,2})月(\d{1,2})/);
   if(cm){const d=new Date(yr,+cm[1]-1,+cm[2]);if(!isNaN(d))res.push(d);}
   return res;
@@ -526,18 +559,17 @@ function isSoon(d){const n=new Date();n.setHours(0,0,0,0);const dd=new Date(d);d
 function dayLbl(d){const n=new Date();n.setHours(0,0,0,0);const dd=new Date(d);dd.setHours(0,0,0,0);const x=(dd-n)/86400000;return x===0?'今天':x===1?'明天':`${d.getMonth()+1}/${d.getDate()}`;}
 function showToast(msg,dur=3000){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',dur);}
 
-// Result badge class
-function resultClass(r) {
+function resultClass(r){
   if(!r) return '';
-  if(r.includes('錄取')&&!r.includes('未')) return 'result-錄取';
-  if(r.includes('未錄取')||r.includes('落榜')) return 'result-未錄取';
-  if(r.includes('備取')||r.includes('候補')) return 'result-備取';
-  return 'result-other';
+  if(r.includes('未錄取')||r.includes('落榜')) return 'res-未錄取';
+  if(r.includes('備取')||r.includes('候補')) return 'res-備取';
+  if(r.includes('錄取')) return 'res-錄取';
+  return 'res-other';
 }
 
-// ═══════════════ ALERT BANNER ═══════════════
+// ═══ ALERT BANNER ═══
 function renderAlert() {
-  const chips=document.getElementById('alert-chips');chips.innerHTML='';
+  const chips=document.getElementById('alert-chips'); chips.innerHTML='';
   const evs=[];
   KG.forEach(k=>{
     if(k.status==='不去') return;
@@ -552,10 +584,10 @@ function renderAlert() {
   evs.forEach(e=>{const c=document.createElement('div');c.className='alert-chip';c.innerHTML=`<span class="chip-dot" style="background:${e.col}"></span><strong>${dayLbl(e.d)}</strong>&nbsp;${e.lbl}｜${e.name}`;chips.appendChild(c);});
 }
 
-// ═══════════════ FILTER ═══════════════
+// ═══ FILTER ═══
 function setFilter(f){currentFilter=f;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.status===f));renderCards();}
 
-// ═══════════════ CARDS ═══════════════
+// ═══ CARDS ═══
 function getSorted() {
   const mode=document.getElementById('sort-select')?.value||'default';
   let arr=[...KG];
@@ -584,25 +616,23 @@ function cardHTML(k) {
   const sc='s-'+k.status;
   const dimmed=k.status==='不去'&&currentFilter==='all'?' dimmed':'';
   const shortN=k.name.replace(/臺北市私立|臺北市/g,'');
-  const rank=customRanks[k.id]!=null?`<span style="background:var(--accent);color:white;font-size:9.5px;font-weight:700;padding:2px 5px;border-radius:8px">#${customRanks[k.id]}</span>`:'';
-  const res=customResults[k.id];
-  const resBadge=res?`<span class="result-badge ${resultClass(res)}">${res}</span>`:'';
+  const rankBadge=customRanks[k.id]!=null?`<span class="rank-badge">#${customRanks[k.id]}</span>`:'';
+  const resBadge=k.drawResult?`<span class="result-badge ${resultClass(k.drawResult)}">${k.drawResult}</span>`:'';
 
-  const engTag=k.eng==='有'?`<span class="tag tag-eng" title="${k.engNote||''}">英文 ✓${k.engNote?' '+k.engNote:''}</span>`:k.eng==='無'?`<span class="tag tag-noeng">英文 ✗</span>`:'';
-  const artTag=k.art==='有'?`<span class="tag tag-art" title="${k.artNote||''}">才藝 ✓${k.artNote?' '+k.artNote:''}</span>`:k.art==='無'?`<span class="tag tag-noart">才藝 ✗</span>`:'';
+  const engTag=k.eng==='有'?`<span class="tag tag-eng">英文 ✓${k.engNote?' '+k.engNote:''}</span>`:k.eng==='無'?`<span class="tag tag-noeng">英文 ✗</span>`:'';
+  const artTag=k.art==='有'?`<span class="tag tag-art">才藝 ✓${k.artNote?' '+k.artNote:''}</span>`:k.art==='無'?`<span class="tag tag-noart">才藝 ✗</span>`:'';
   const extTag=k.extTime?`<span class="tag tag-ext">延拖至 ${k.extTime}</span>`:'';
   const tagsRow=(engTag||artTag||extTag)?`<div class="card-tags">${engTag}${artTag}${extTag}</div>`:'';
 
-  const mkDT=(val,lbl,cls)=>{if(!val)return'';const ds=parseDates(val);if(!ds.length)return`<span class="date-tag ${cls}">${lbl}</span>`;return ds.map(d=>`<span class="date-tag ${cls}">${lbl} ${d.getMonth()+1}/${d.getDate()}</span>`).join('');};
+  const mkDT=(val,lbl,cls)=>{if(!val)return'';const ds=parseDates(val);if(!ds.length)return'';return ds.map(d=>`<span class="date-tag ${cls}">${lbl} ${d.getMonth()+1}/${d.getDate()}</span>`).join('');};
   const dates=[mkDT(k.visitDate,'參觀','visit'),mkDT(k.regDate,'登記','reg'),mkDT(k.drawDate,'抽籤','draw')].filter(Boolean).join('');
 
   return `<div class="card ${sc}${dimmed}">
   <div class="card-status-bar"></div>
   <div class="card-header">
     <div class="card-name">
-      <div class="card-name-row">
-        <span>${shortN}</span>${rank}${resBadge}
-      </div>
+      ${shortN}
+      <div class="card-name-badges">${rankBadge}${resBadge}</div>
     </div>
     <div class="status-badge">${k.status}</div>
   </div>
@@ -626,51 +656,37 @@ function cardHTML(k) {
 
 function toggleExp(btn){const c=btn.nextElementSibling;const o=c.style.display==='block';c.style.display=o?'none':'block';btn.classList.toggle('expanded',!o);}
 
-// ═══════════════ SORT TABLE ═══════════════
+// ═══ SORT TABLE ═══
 function renderSortTable() {
   document.getElementById('sort-table-body').innerHTML=KG.map(k=>`
     <tr>
       <td><input type="number" class="rank-input" min="1" placeholder="—"
         value="${customRanks[k.id]!=null?customRanks[k.id]:''}" id="rank-${k.id}"></td>
-      <td><input type="text" class="result-input" placeholder="—"
-        value="${customResults[k.id]||''}" id="result-${k.id}" 
-        style="${customResults[k.id]?'border-color:var(--accent);':''}"
-      ></td>
+      <td style="font-size:12px;color:${k.drawResult?'#6a1b9a':k.status==='已登記'?'var(--ink-muted)':'#ccc'};font-weight:${k.drawResult?'600':'400'}">
+        ${k.drawResult||'—'}</td>
       <td style="font-weight:500;font-size:12px">${k.name.replace(/臺北市私立|臺北市/g,'')}</td>
       <td style="font-size:11px;color:var(--ink-muted)">${k.region}</td>
       <td>${k.price?'NT$'+k.price.toLocaleString():'—'}</td>
       <td style="font-size:12px">${k.extTime||'—'}</td>
-      <td><span style="color:${k.eng==='有'?'#2e7d32':'#bbb'}">${k.eng||'—'}</span>${k.engNote?`<br><span style="font-size:10px;color:var(--ink-muted)">${k.engNote}</span>`:''}</td>
-      <td><span style="color:${k.art==='有'?'#e65100':'#bbb'}">${k.art||'—'}</span>${k.artNote?`<br><span style="font-size:10px;color:var(--ink-muted)">${k.artNote}</span>`:''}</td>
+      <td style="font-size:11px"><span style="color:${k.eng==='有'?'#2e7d32':k.eng==='無'?'#bbb':'#ccc'}">${k.eng||'—'}</span>${k.engNote?`<br><span style="font-size:10px;color:var(--ink-muted)">${k.engNote}</span>`:''}</td>
+      <td style="font-size:11px"><span style="color:${k.art==='有'?'#e65100':k.art==='無'?'#bbb':'#ccc'}">${k.art||'—'}</span>${k.artNote?`<br><span style="font-size:10px;color:var(--ink-muted)">${k.artNote}</span>`:''}</td>
       <td><span class="status-badge s-${k.status}">${k.status}</span></td>
     </tr>`).join('');
 }
 
-function saveCustomData() {
-  customRanks={}; customResults={};
-  KG.forEach(k=>{
-    const rv=document.getElementById(`rank-${k.id}`)?.value;
-    if(rv) customRanks[k.id]=+rv;
-    const res=document.getElementById(`result-${k.id}`)?.value.trim();
-    if(res) customResults[k.id]=res;
-  });
+function saveRanks(){
+  customRanks={};
+  KG.forEach(k=>{const v=document.getElementById(`rank-${k.id}`)?.value;if(v)customRanks[k.id]=+v;});
   localStorage.setItem('kg_ranks',JSON.stringify(customRanks));
-  localStorage.setItem('kg_results',JSON.stringify(customResults));
   document.getElementById('sort-select').value='custom';
   renderCards();
-  showToast('✓ 已套用排序與抽籤結果');
+  showToast('✓ 排序已套用');
 }
+function clearRanks(){if(!confirm('確定清除所有序位？'))return;customRanks={};localStorage.removeItem('kg_ranks');renderSortTable();renderCards();showToast('序位已清除');}
 
-function clearAll() {
-  if(!confirm('確定清除所有序位與抽籤結果？')) return;
-  customRanks={}; customResults={};
-  localStorage.removeItem('kg_ranks'); localStorage.removeItem('kg_results');
-  renderSortTable(); renderCards(); showToast('已清除');
-}
-
-// ═══════════════ MAP ═══════════════
+// ═══ MAP ═══
 function initMap() {
-  if(mapInit) return; mapInit=true;
+  if(mapInit)return;mapInit=true;
   gMap=new google.maps.Map(document.getElementById('map-container'),{
     center:{lat:25.028,lng:121.535},zoom:13,mapTypeControl:false,streetViewControl:false,
     styles:[{featureType:'poi',elementType:'labels',stylers:[{visibility:'off'}]}]
@@ -686,20 +702,19 @@ function initMap() {
 }
 
 function refreshMapMarkers(iwRef) {
-  mapMarkers.forEach(m=>m.setMap(null)); mapMarkers=[];
-  if(!gMap) return;
+  mapMarkers.forEach(m=>m.setMap(null));mapMarkers=[];
+  if(!gMap)return;
   const iw=iwRef||new google.maps.InfoWindow();
   KG.forEach(k=>{
-    if(!k.lat||!k.lng) return;
+    if(!k.lat||!k.lng)return;
     const col=STATUS_COLORS[k.status]||'#999';
-    const res=customResults[k.id];
     const m=new google.maps.Marker({
       position:{lat:k.lat,lng:k.lng},map:gMap,title:k.name,
       icon:{path:google.maps.SymbolPath.CIRCLE,scale:k.status==='不去'?6:9,fillColor:col,fillOpacity:k.status==='不去'?0.4:0.9,strokeColor:'#fff',strokeWeight:2}
     });
     m.addListener('click',()=>{
       iw.setContent(`<div style="font-family:sans-serif;padding:4px;max-width:230px">
-        <strong>${k.name.replace(/臺北市私立|臺北市/g,'')}</strong>${res?` <span style="font-size:11px;color:#6a1b9a">[${res}]</span>`:''}<br>
+        <strong>${k.name.replace(/臺北市私立|臺北市/g,'')}</strong>${k.drawResult?` <span style="font-size:11px;color:#6a1b9a">[${k.drawResult}]</span>`:''}<br>
         <span style="font-size:11px;color:#666">${k.address}</span><br>
         <span style="font-size:12px">${k.price?'NT$'+k.price.toLocaleString()+'/月':'月費未知'}</span><br>
         ${k.extTime?`<span style="font-size:11px">延拖至 ${k.extTime}</span><br>`:''}
@@ -712,7 +727,7 @@ function refreshMapMarkers(iwRef) {
   });
 }
 
-// ═══════════════ CALENDAR ═══════════════
+// ═══ CALENDAR ═══
 function renderCalendar() {
   document.getElementById('cal-month-title').textContent=`${calYear} 年 ${calMonth+1} 月`;
   const el=document.getElementById('cal-days');el.innerHTML='';
@@ -721,7 +736,11 @@ function renderCalendar() {
   const dim=new Date(calYear,calMonth+1,0).getDate();
   const evMap={};
   const addEv=(d,lbl,cls,name)=>{const k=`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;(evMap[k]||(evMap[k]=[])).push({lbl,cls,name});};
-  KG.forEach(k=>{if(k.status==='不去')return;const n=k.name.replace(/臺北市私立|臺北市/g,'').slice(0,5);[['visitDate','參觀','visit'],['regDate','登記','reg'],['drawDate','抽籤','draw'],['reportDate','報到','report']].forEach(([key,lbl,cls])=>parseDates(k[key]).forEach(d=>addEv(d,lbl,cls,n)));});
+  KG.forEach(k=>{
+    if(k.status==='不去')return;
+    const n=k.name.replace(/臺北市私立|臺北市/g,'').slice(0,5);
+    [['visitDate','參觀','visit'],['regDate','登記','reg'],['drawDate','抽籤','draw'],['reportDate','報到','report']].forEach(([key,lbl,cls])=>parseDates(k[key]).forEach(d=>addEv(d,lbl,cls,n)));
+  });
   memos.forEach(m=>addEv(new Date(m.date),'備忘','memo',m.text.slice(0,10)));
   const total=Math.ceil((fd+dim)/7)*7;
   for(let i=0;i<total;i++){
@@ -740,16 +759,16 @@ function renderCalendar() {
 }
 function changeMonth(d){calMonth+=d;if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}renderCalendar();}
 
-// ═══════════════ MEMOS ═══════════════
+// ═══ MEMOS ═══
 function addMemo(){const date=document.getElementById('memo-date').value,text=document.getElementById('memo-text').value.trim();if(!date||!text){showToast('請填入日期和內容');return;}memos.push({date,text,id:Date.now()});localStorage.setItem('kg_memos',JSON.stringify(memos));document.getElementById('memo-text').value='';renderMemos();renderCalendar();renderAlert();}
 function deleteMemo(id){memos=memos.filter(m=>m.id!==id);localStorage.setItem('kg_memos',JSON.stringify(memos));renderMemos();renderCalendar();renderAlert();}
 function renderMemos(){const l=document.getElementById('memo-list');if(!memos.length){l.innerHTML='<div style="font-size:12px;color:var(--ink-muted);padding:4px">尚無備忘記錄</div>';return;}l.innerHTML=[...memos].sort((a,b)=>new Date(a.date)-new Date(b.date)).map(m=>`<div class="memo-item"><div class="memo-item-date">${m.date}</div><div class="memo-item-text">${m.text}</div><button class="btn-memo-del" onclick="deleteMemo(${m.id})">✕</button></div>`).join('');}
 
-// ═══════════════ PAGE SWITCH ═══════════════
+// ═══ PAGE SWITCH ═══
 function switchPage(name){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.getElementById(`page-${name}`).classList.add('active');document.querySelector(`[data-page="${name}"]`).classList.add('active');if(name==='map')setTimeout(()=>{initMap();if(mapInit&&!mapMarkers.length)refreshMapMarkers();},100);if(name==='calendar')renderCalendar();if(name==='sort')renderSortTable();}
 function renderAll(){renderCards();renderAlert();renderMemos();}
 
-// ═══════════════ INIT ═══════════════
+// ═══ INIT ═══
 async function init() {
   const t=new Date(),pad=n=>String(n).padStart(2,'0');
   document.getElementById('memo-date').value=`${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`;
