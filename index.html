@@ -54,6 +54,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--cream);color:var(--i
 .filter-btn:hover{border-color:var(--ink-light);}
 .filter-btn.active{background:var(--ink);color:white;border-color:var(--ink);}
 .filter-btn[data-status="不去"].active{background:#757575;border-color:#757575;}
+.filter-btn[data-status="all"].active{background:var(--accent);border-color:var(--accent);}
 .cards-container{padding:18px 26px;display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px;}
 .card{background:white;border-radius:var(--radius);border:1.5px solid var(--cream-border);overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;display:flex;flex-direction:column;}
 .card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(44,36,22,0.1);}
@@ -215,6 +216,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--cream);color:var(--i
       <label>排序：</label>
       <select class="sort-select" id="sort-select" onchange="renderCards()">
         <option value="custom">自訂序位</option>
+        <option value="draw">抽籤結果 正取→備取→未知</option>
         <option value="price-asc">月費 低→高</option>
         <option value="price-desc">月費 高→低</option>
         <option value="dist-san">産基會 近→遠</option>
@@ -223,12 +225,12 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--cream);color:var(--i
         <option value="default">預設順序</option>
       </select>
       <div class="filter-wrap">
-        <button class="filter-btn active" data-status="all" onclick="setFilter('all')">全部</button>
-        <button class="filter-btn" data-status="不去" onclick="setFilter('不去')">不去</button>
-        <button class="filter-btn" data-status="未打電話" onclick="setFilter('未打電話')">未打</button>
-        <button class="filter-btn" data-status="已預約" onclick="setFilter('已預約')">已預約</button>
-        <button class="filter-btn" data-status="已參觀" onclick="setFilter('已參觀')">已參觀</button>
-        <button class="filter-btn" data-status="已登記" onclick="setFilter('已登記')">已登記</button>
+        <button class="filter-btn active" data-status="all" onclick="toggleFilter('all')">全部</button>
+        <button class="filter-btn" data-status="不去" onclick="toggleFilter('不去')">不去</button>
+        <button class="filter-btn" data-status="未打電話" onclick="toggleFilter('未打電話')">未打</button>
+        <button class="filter-btn" data-status="已預約" onclick="toggleFilter('已預約')">已預約</button>
+        <button class="filter-btn" data-status="已參觀" onclick="toggleFilter('已參觀')">已參觀</button>
+        <button class="filter-btn" data-status="已登記" onclick="toggleFilter('已登記')">已登記</button>
       </div>
     </div>
     <div class="cards-container" id="cards-container"></div>
@@ -652,13 +654,33 @@ function renderAlert() {
 }
 
 // ═══ FILTER ═══
-function setFilter(f){currentFilter=f;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.status===f));renderCards();}
+// Multi-select filter: activeFilters is a Set of selected statuses
+let activeFilters = new Set(['all']);
+
+function toggleFilter(f) {
+  if (f === 'all') {
+    // 'all' clears everything else
+    activeFilters = new Set(['all']);
+  } else {
+    activeFilters.delete('all');
+    if (activeFilters.has(f)) {
+      activeFilters.delete(f);
+      if (activeFilters.size === 0) activeFilters.add('all'); // revert to all if nothing selected
+    } else {
+      activeFilters.add(f);
+    }
+  }
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.toggle('active', activeFilters.has(b.dataset.status));
+  });
+  renderCards();
+}
 
 // ═══ CARDS ═══
 function getSorted() {
   const mode=document.getElementById('sort-select')?.value||'default';
   let arr=[...KG];
-  if(currentFilter!=='all') arr=arr.filter(k=>k.status===currentFilter);
+  if(!activeFilters.has('all')) arr=arr.filter(k=>activeFilters.has(k.status));
   const skip=k=>k.status==='不去'?1:0;
   switch(mode){
     case 'custom':    arr.sort((a,b)=>skip(a)-skip(b)||(customRanks[a.id]??999)-(customRanks[b.id]??999)||a.id-b.id);break;
@@ -667,6 +689,17 @@ function getSorted() {
     case 'dist-san':  arr.sort((a,b)=>skip(a)-skip(b)||((a.dist_san_bike??999))-(b.dist_san_bike??999));break;
     case 'dist-he':   arr.sort((a,b)=>skip(a)-skip(b)||((a.dist_he_bike??999))-(b.dist_he_bike??999));break;
     case 'status':    arr.sort((a,b)=>(STATUS_ORDER[b.status]||0)-(STATUS_ORDER[a.status]||0));break;
+    case 'draw': {
+      // 正取 first, then 備取 (sorted by number), then no result, 不去 last
+      const drawRank = r => {
+        if(!r) return 999;
+        if(r.includes('正取')||(!r.includes('備取')&&r.includes('錄取'))) return 0;
+        const m = r.match(/備取\s*(\d+)/);
+        return m ? parseInt(m[1]) : (r ? 500 : 999);
+      };
+      arr.sort((a,b)=>skip(a)-skip(b)||drawRank(a.drawResult)-drawRank(b.drawResult)||a.id-b.id);
+      break;
+    }
     default:          arr.sort((a,b)=>skip(a)-skip(b)||a.id-b.id);
   }
   return arr;
@@ -681,7 +714,7 @@ function renderCards() {
 
 function cardHTML(k) {
   const sc='s-'+k.status;
-  const dimmed=k.status==='不去'&&currentFilter==='all'?' dimmed':'';
+  const dimmed=k.status==='不去'&&activeFilters.has('all')?' dimmed':'';
   const shortN=k.name.replace(/臺北市私立|臺北市/g,'');
   const rankBadge=customRanks[k.id]!=null?`<span class="rank-badge">#${customRanks[k.id]}</span>`:'';
   const resBadge=k.drawResult?`<span class="result-badge ${resultClass(k.drawResult)}">${k.drawResult}</span>`:'';
